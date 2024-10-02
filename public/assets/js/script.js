@@ -8,58 +8,7 @@ $(document).ready(function() {
         }
     });
 
-    $('#downloadForm').on('submit', function(event) {
-        event.preventDefault();
-        var formData = $(this).serialize();
-        $('#inputSection').hide();
-        $('.progress').show();
-        $('#cancelButton').show();
-        $('#progressText').text('Fetching playlist...');
-
-        $.ajax({
-            url: '/download',
-            method: 'POST',
-            data: formData,
-            success: function(response) {
-                videoDetails = response.video_details;
-                $('#progressText').text('Playlist fetched. Ready to download.');
-                displayVideoDetails();
-            },
-            error: function(response) {
-                $('#progressText').text(response.responseJSON.error || 'Download Failed');
-                $('#inputSection').show();
-                $('.progress').hide();
-                $('#cancelButton').hide();
-            }
-        });
-    });
-
-    function displayVideoDetails() {
-        $('#video-list').empty();
-        $('#video-list').append(`
-            <div class="video-item">
-                <input type="checkbox" id="select-all-checkbox">
-                <label for="select-all-checkbox">Select All</label>
-            </div>
-        `);
-
-        videoDetails.forEach(function(video, index) {
-            $('#video-list').append(`
-                <div class="video-item" id="video-${index}">
-                    <input type="checkbox" class="video-checkbox" data-video-index="${index}">
-                    <img src="${video.thumbnail}" alt="Thumbnail">
-                    <h5>${video.title}</h5>
-                    <p>Duration: ${video.duration}</p>
-                    <button class="btn btn-primary float-right download-button" data-video-index="${index}">Download</button>
-                </div>
-            `);
-        });
-
-        $('#selectAllButton').show();
-        $('#downloadSelectedButton').show();
-        $('#cancelButton').hide();
-        $('#convertNextButton').show();
-    }
+    
 
     $('#video-list').on('change', '#select-all-checkbox', function() {
         let isChecked = $(this).is(':checked');
@@ -81,6 +30,22 @@ $(document).ready(function() {
         }
     });
 
+        $('#pasteButton').click(function() {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText().then(function(text) {
+                    $('#playlist_url').val(text);
+                    // Hide the paste button after successful paste
+                    $('#pasteButton').hide();
+                }).catch(function(err) {
+                    console.error('Failed to read clipboard contents: ', err);
+                    alert('Failed to read clipboard contents. Please allow clipboard access.');
+                });
+            } else {
+                alert('Clipboard API not supported or permission denied.');
+            }
+        });
+
+    
     function downloadVideos(videoIds) {
         if (videoIds.length > 0) {
             let videoId = videoIds.shift();
@@ -124,27 +89,11 @@ $(document).ready(function() {
         } else if (isFinished) {
             button.text('Finished').addClass('btn-dark').removeClass('btn-primary').prop('disabled', true);
         }
-    }
+    
 
-    $('#cancelButton').on('click', function() {
-        $('#progressText').text('');
-        $('.progress-bar').css('width', '0%').attr('aria-valuenow', 0);
-        $('.progress').hide();
-        $('#inputSection').show();
-        $('#cancelButton').hide();
-    });
 
-    $('#convertNextButton').on('click', function() {
-        $('#progressText').text('');
-        $('.progress-bar').css('width', '0%').attr('aria-valuenow', 0);
-        $('.progress').hide();
-        $('#inputSection').show();
-        $('#convertNextButton').hide();
-        $('#video-list').empty();
-        $('#selectAllButton').hide();
-        $('#downloadSelectedButton').hide();
-        videoDetails = [];
-    });
+  
+    };
 
     $('#video-list').on('click', '.download-button', function() {
         let index = $(this).data('video-index');

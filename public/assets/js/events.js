@@ -4,6 +4,10 @@ function initEventHandlers() {
     $('.toggle-button').click(function() {
         $('.nav-links').toggleClass('active');
     });
+    $('#selectAllButton').on('click', function() {
+        $('.video-checkbox').prop('checked', true);
+    });
+
    
 $('#commentForm').on('submit', function(event) {
     event.preventDefault();
@@ -89,3 +93,26 @@ function getSelectedVideos() {
         location.reload();
     });
 }
+$(document).ready(function() {
+    $('#pasteButton').click(function() {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText().then(function(text) {
+                $('#playlist_url').val(text);
+                // Hide the paste button after successful paste
+                $('#pasteButton').hide();
+            }).catch(function(err) {
+                console.error('Failed to read clipboard contents: ', err);
+                alert('Failed to read clipboard contents. Please allow clipboard access.');
+            });
+        } else {
+            alert('Clipboard API not supported or permission denied.');
+        }
+    });
+
+    // Show the paste button again when the input field is cleared
+    $('#playlist_url').on('input', function() {
+        if ($(this).val() === '') {
+            $('#pasteButton').show();
+        }
+    });
+});

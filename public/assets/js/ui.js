@@ -3,7 +3,7 @@
 function displayVideoDetails(videoDetails) {
     let videoList = $('#video-table-body');
     videoList.empty();
-
+    $('#table-headers').show();
     videoDetails.forEach((video, index) => {
         let videoRow = `
             <tr id="video-${index}">
