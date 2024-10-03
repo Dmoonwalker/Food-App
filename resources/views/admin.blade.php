@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta Tags for Character Encoding and Viewport Settings -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visits</title>
+    
+    <!-- CSRF Token for Security in Forms (Used in Laravel Applications) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Page Title -->
+    <title>Downloads</title>
+    
     <!-- Include your CSS here -->
     <style>
         .table-container {
@@ -80,23 +87,24 @@
 </head>
 <body>
     <div class="container mt-5">
-        <div id="visitsContainer" class="row" style="display: none;">
+        <div id="downloadsContainer" class="row" style="display: none;">
             <div class="col-md-12">
-                <h2>Visits</h2>
-                <!-- Total Visits Display -->
+                <h2>Downloads</h2>
+                <!-- Total Downloads Display -->
                 <div class="mb-3">
-                    <strong>Total Visits:</strong> <span id="totalVisits">0</span>
+                    <strong>Total Downloads:</strong> <span id="totalDownloads">0</span>
                 </div>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
+                            <th>ID</th>
+                            <th>URL</th>
                             <th>IP Address</th>
-                            <th>User Agent</th>
-                            <th>Visited At</th>
+                            <th>Downloaded At</th>
                         </tr>
                     </thead>
-                    <tbody id="visitsTableBody">
-                        <!-- Visits will be loaded here dynamically -->
+                    <tbody id="downloadsTableBody">
+                        <!-- Downloads will be loaded here dynamically -->
                     </tbody>
                 </table>
             </div>
@@ -116,7 +124,7 @@
                     <form id="passwordForm">
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" id="password" class="form-control" required>
+                            <input type="password" id="password" class="form-control" required aria-label="Password">
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -139,7 +147,7 @@
                 let password = $('#password').val();
 
                 $.ajax({
-                    url: '{{ route('checkPasswordAndGetVisits') }}',
+                    url: '{{ route('checkPasswordAndGetDownloads') }}',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -148,7 +156,7 @@
                     success: function(response) {
                         if (response.success) {
                             $('#passwordModal').modal('hide');
-                            loadVisits(response.visits, response.count);
+                            loadDownloads(response.downloads, response.count);
                         } else {
                             $('#passwordError').show();
                         }
@@ -159,26 +167,27 @@
                 });
             });
 
-            function loadVisits(visits, count) {
-                // Display the total number of visits
-                $('#totalVisits').text(count);
+            function loadDownloads(downloads, count) {
+                // Display the total number of downloads
+                $('#totalDownloads').text(count);
 
-                let visitsTableBody = $('#visitsTableBody');
-                visitsTableBody.empty();
+                let downloadsTableBody = $('#downloadsTableBody');
+                downloadsTableBody.empty();
 
-                // Iterate through each visit and append to the table
-                visits.forEach(function(visit) {
+                // Iterate through each download and append to the table
+                downloads.forEach(function(download) {
                     let row = `
                         <tr>
-                            <td>${visit.ip_address}</td>
-                            <td>${visit.user_agent}</td>
-                            <td>${visit.visited_at}</td>
+                            <td>${download.id}</td>
+                            <td><a href="${download.url}" target="_blank">${download.url}</a></td>
+                            <td>${download.ip_address}</td>
+                            <td>${download.downloaded_at}</td>
                         </tr>`;
-                    visitsTableBody.append(row);
+                    downloadsTableBody.append(row);
                 });
 
-                // Show the visits container
-                $('#visitsContainer').show();
+                // Show the downloads container
+                $('#downloadsContainer').show();
             }
         });
     </script>

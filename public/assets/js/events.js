@@ -1,98 +1,80 @@
 // events.js
 
+// Initialize event handlers for user interactions on the page
 function initEventHandlers() {
+    // Toggle visibility of the navigation menu when toggle-button is clicked
     $('.toggle-button').click(function() {
         $('.nav-links').toggleClass('active');
     });
+
+    // When 'Select All' button is clicked, check all video checkboxes
     $('#selectAllButton').on('click', function() {
-        $('.video-checkbox').prop('checked', true);
+        $('.video-checkbox').prop('checked', true);  // Check all checkboxes
     });
 
-   
-$('#commentForm').on('submit', function(event) {
-    event.preventDefault();
-    let formData = $(this).serialize();
-    $.ajax({
-        url: '/comments',
-        method: 'POST',
-        data: formData,
-        success: function(response) {
-            $('#commentsList').prepend(renderComment(response.comment));
-            $('#commentText').val('');
-        },
-        error: function(response) {
-            alert('Failed to post comment. Please try again.');
+    // Event listener for the download selected button
+    $('#downloadSelectedButton').on('click', function() {
+        let selectedVideos = getSelectedVideos();  // Get selected videos
+        
+        if (selectedVideos.length > 0) {
+            showProgress('Downloading Selected...', true);  // Show progress message
+            processVideoDownloads(selectedVideos);  // Start download process
+        } else {
+            showProgress('No Videos Selected');  // Show message if no videos selected
         }
     });
-});
-// Handle download selected button click
-$('#downloadSelectedButton').on('click', function() {
-    let selectedVideos = getSelectedVideos();
 
-    if (selectedVideos.length > 0) {
-        showProgress('Downloading selected...', true);
-        processVideoDownloads(selectedVideos);
-    } else {
-        showProgress('No videos selected');
-    }
-});
-function getSelectedVideos() {
-    let selectedVideos = [];
-    $('.video-checkbox:checked').each(function() {
-        let index = $(this).data('video-index');
-        selectedVideos.push(videoDetails[index].id);
-    });
-    return selectedVideos;
-}
-
-    // Handle form submission to fetch playlist
+    // Handle playlist form submission
     $('#downloadForm').on('submit', function(event) {
-        event.preventDefault();
-        var formData = $(this).serialize();
-        toggleInputSection(false);
-        showProgress('Fetching playlist...', true);
-        format = $('#format').val();  // Extract format directly
-        quality = $('#quality').val();  
+        event.preventDefault();  // Prevent default form submission
+        var formData = $(this).serialize();  // Serialize form data
+        toggleInputSection(false);  // Hide input section
+        showProgress('Fetching Playlist...', true);  // Show progress message
+        
+        // Fetch playlist data
         fetchPlaylist(formData, function(response) {
-            videoDetails = response.video_details;
-            showProgress('Playlist Ready', false);
-            displayVideoDetails(videoDetails);
-   
+            videoDetails = response.video_details;  // Assign received video details
+           
+            showProgress('Playlist Ready', false);  // Show message when ready
+            displayVideoDetails(videoDetails);  // Display video details on the UI
         }, function(response) {
-            showProgress(response.responseJSON.error || 'Download Failed', false);
-            toggleInputSection(true);
-            hideProgress();
+            showProgress(response.responseJSON.error || 'Download Failed', false);  // Handle error
+            toggleInputSection(true);  // Show input section again
+           
         });
     });
 
-    // Handle individual video download button click
+    // Event handler for individual video download button
     $('#video-list').on('click', '.download-button', function() {
-        let index = $(this).data('video-index');
-        let videoId = videoDetails[index].id;
-        let format = $(`#format-${index}`).val();
-        let quality = $(`#quality-${index}`).val();
-        updateButtonStatus(index, true);
-        showProgress('Downloading', true);
-        downloadVideo(videoId, format,quality,function(response) {
+        let index = $(this).data('video-index');  // Get the index of clicked video
+        let videoId = videoDetails[index].id;  // Get the video ID
+        let format = $(`#format-${index}`).val();  // Get the selected format
+        let quality = $(`#quality-${index}`).val();  // Get the selected quality
+        
+        updateButtonStatus(index, true);  // Update the button status to downloading
+        showProgress('Downloading', true);  // Show progress message
+        
+        // Call to download the selected video
+        downloadVideo(videoId, format, quality, function(response) {
             var link = document.createElement('a');
-            link.href = response.file_url;
-            link.download = response.file_url.split('/').pop();
-            link.click();
-            updateButtonStatus(index, false, true);
-            showProgress('Downloaded', false);
+            link.href = response.file_url;  // Video download link
+            link.download = response.file_url.split('/').pop();  // Set download filename
+            link.click();  // Trigger the download
+            updateButtonStatus(index, false, true);  // Update button status when done
+            showProgress('Downloaded', false);  // Show download completion message
         }, function(response) {
-            showProgress(response.responseJSON.error || 'Download Failed', false);
-            toggleInputSection(true);
+            showProgress(response.responseJSON.error || 'Download Failed', false);  // Handle download failure
+            toggleInputSection(true);  // Re-enable inputs
             hideProgress();
         });
     });
 
-    
-    // Handle convert next button click
+    // Reload page when convert next button is clicked
     $('#convertNextButton').on('click', function() {
-        location.reload();
+        location.reload();  // Reload the current page
     });
 }
+
 $(document).ready(function() {
     $('#pasteButton').click(function() {
         if (navigator.clipboard && navigator.clipboard.readText) {

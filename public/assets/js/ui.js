@@ -1,16 +1,17 @@
 // ui.js
-
+// Function to display video details in the table
 function displayVideoDetails(videoDetails) {
-    let videoList = $('#video-table-body');
-    videoList.empty();
-    $('#table-headers').show();
+    let videoList = $('#video-table-body');  // Get the table body element
+    videoList.empty();  // Clear existing rows
+    $('#table-headers').show();  // Show table headers
+
+    // Iterate through the video details array and add each video to the table
     videoDetails.forEach((video, index) => {
         let videoRow = `
             <tr id="video-${index}">
                 <td><input type="checkbox" class="video-checkbox" data-video-index="${index}"></td>
                 <td><img src="${video.thumbnail}" alt="${video.title}" width="100"></td>
                 <td>${video.title} <br>  ${video.duration}</td>
-
                 <td>
                     <div class="form-row">
                         <div class="form-group col-md-6">
@@ -35,12 +36,11 @@ function displayVideoDetails(videoDetails) {
                     <button class="btn btn-primary download-button" data-video-index="${index}">Download</button>
                 </td>
             </tr>`;
-        videoList.append(videoRow);
+        videoList.append(videoRow);  // Append each video row to the table
     });
-    toggleButtons(true);
-}
 
- 
+    toggleButtons(true);  // Show buttons after displaying the video list
+}
 
 
 

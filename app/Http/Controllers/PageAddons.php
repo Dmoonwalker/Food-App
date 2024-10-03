@@ -10,4 +10,11 @@ class PageAddons extends Controller
 
         return view('faq');
     }
+    public function terms()
+    {
+        // Optionally, you can pass dynamic data to the view
+        $lastUpdated = now()->format('F d, Y');
+
+        return view('terms', compact('lastUpdated'));
+    }
 }
